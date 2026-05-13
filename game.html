@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>인형이 된 나</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;}
+:root{
+  --red:#cc0000;--red2:#ff0000;--text:#e0e0e0;--dim:#666;
+  --bg-night:#0a0a0f;--bg-dawn:#0d0d1a;--bg-day:#1a1a2e;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Noto Serif KR',serif;}
+#G{
+  position:relative;width:100%;max-width:430px;height:100dvh;
+  margin:0 auto;overflow:hidden;background:var(--bg-night);color:var(--text);
+  transition:background 1s;
+}
+
+/* ── SCREENS ── */
+.scr{position:absolute;top:0;left:0;width:100%;height:100%;display:none;flex-direction:column;align-items:center;}
+.scr.on{display:flex;}
+
+/* ── HUD ── */
+#hud{
+  position:absolute;top:0;left:0;right:0;height:52px;
+  display:none;align-items:center;justify-content:space-between;
+  padding:0 14px;background:rgba(0,0,0,.75);border-bottom:1px solid #8b000044;z-index:100;
+}
+#hud-stage{font-size:12px;color:#cc4444;letter-spacing:1px;}
+#hud-hp{display:flex;gap:3px;font-size:15px;}
+#hud-timer{font-size:13px;color:#cc6666;font-variant-numeric:tabular-nums;min-width:44px;text-align:right;}
+#hud-timer.danger{color:#ff0000;animation:blink .6s infinite;}
+
+/* ── TITLE ── */
+#s-title{justify-content:center;background:radial-gradient(ellipse at center,#1a0000 0%,#000 70%);}
+.t-doll{font-size:88px;animation:float 3s ease-in-out infinite;filter:drop-shadow(0 0 24px #cc0000);margin-bottom:10px;}
+.t-main{font-size:30px;font-weight:900;color:#cc0000;text-shadow:0 0 24px #ff0000;letter-spacing:4px;margin-bottom:8px;}
+.t-sub{font-size:11px;color:#444;margin-bottom:44px;letter-spacing:2px;}
+.btn{
+  padding:13px 38px;background:transparent;border:1px solid #cc0000;
+  color:#cc0000;font-family:'Noto Serif KR',serif;font-size:15px;
+  cursor:pointer;margin:6px;transition:background .2s;
+}
+.btn:active{background:#cc000033;}
+.btn.pri{background:#cc000018;font-weight:700;}
+.t-note{font-size:10px;color:#2a2a2a;margin-top:24px;}
+
+/* ── INTRO ── */
+#s-intro{padding-top:56px;overflow-y:auto;}
+.loc-badge{font-size:11px;color:#555;border:1px solid #2a2a2a;padding:4px 14px;margin:14px 0;letter-spacing:2px;}
+.demon-emo{font-size:96px;animation:bob 1.6s ease-in-out infinite;filter:drop-shadow(0 0 18px #cc0000);margin:6px 0;}
+.demon-nm{font-size:15px;font-weight:700;margin-bottom:4px;}
+.demon-rk{font-size:11px;color:#444;margin-bottom:22px;}
+.dlg-box{
+  width:calc(100% - 32px);min-height:90px;background:rgba(0,0,0,.55);
+  border:1px solid #8b000040;padding:14px;font-size:13px;
+  line-height:2;color:#cc8888;cursor:pointer;
+}
+.dlg-cursor{display:inline-block;width:7px;height:13px;background:#cc4444;animation:blink .8s infinite;vertical-align:middle;margin-left:2px;}
+.mg-preview{margin:18px 0 6px;text-align:center;}
+.mg-preview-ico{font-size:32px;margin-bottom:6px;}
+.mg-preview-nm{font-size:12px;color:#555;}
+#intro-start{margin-top:16px;display:none;}
+
+/* ── MINIGAME ── */
+#s-mg{padding-top:56px;}
+.mg-hdr{width:100%;text-align:center;padding:8px 16px 4px;}
+.mg-title{font-size:13px;color:#666;margin-bottom:4px;}
+.mg-countdown{font-size:22px;color:#cc4444;font-variant-numeric:tabular-nums;font-weight:700;}
+.mg-bar{width:80%;height:5px;background:#1a1a1a;border-radius:3px;margin:4px auto 0;}
+.mg-bar-fill{height:100%;background:#cc0000;border-radius:3px;transition:width .9s linear;}
+.mg-body{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;}
+
+/* ── RESULT ── */
+#s-result{justify-content:center;}
+.res-ico{font-size:80px;margin-bottom:18px;}
+.res-title{font-size:26px;font-weight:900;margin-bottom:12px;}
+.res-msg{font-size:13px;color:#888;text-align:center;padding:0 28px;line-height:2;margin-bottom:24px;white-space:pre-line;}
+.res-hp{margin-bottom:22px;font-size:20px;letter-spacing:4px;}
+
+/* ── GAMEOVER ── */
+#s-over{justify-content:center;background:#000;}
+
+/* ── STORY POPUP ── */
+#story-pop{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.93);display:none;flex-direction:column;
+  align-items:center;justify-content:center;z-index:300;padding:28px 20px;
+}
+#story-pop.on{display:flex;}
+.story-title{font-size:17px;color:#cc0000;margin-bottom:18px;letter-spacing:2px;text-align:center;}
+.story-body{font-size:13px;line-height:2.2;color:#999;text-align:center;white-space:pre-line;margin-bottom:28px;}
+
+/* ── CLEAR OVERLAY ── */
+#clear-ov{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.88);display:none;flex-direction:column;
+  align-items:center;justify-content:center;z-index:200;
+}
+#clear-ov.on{display:flex;}
+.clear-txt{font-size:34px;font-weight:900;color:#cc0000;text-shadow:0 0 30px #ff0000;animation:pop .5s ease-out;}
+.clear-sub{font-size:13px;color:#666;margin-top:14px;}
+
+/* ── NOISE ── */
+#noise{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:999;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:noise .08s infinite;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-16px);}}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-10px) rotate(4deg);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+@keyframes shake{
+  0%,100%{transform:translateX(0);}
+  15%{transform:translateX(-9px) rotate(-1deg);}
+  30%{transform:translateX(9px) rotate(1deg);}
+  45%{transform:translateX(-7px);}
+  60%{transform:translateX(7px);}
+  75%{transform:translateX(-4px);}
+  90%{transform:translateX(4px);}
+}
+@keyframes redfl{0%{background:rgba(180,0,0,0);}50%{background:rgba(180,0,0,.35);}100%{background:rgba(180,0,0,0);}}
+@keyframes noise{0%{transform:translate(0,0);}25%{transform:translate(-2px,1px);}50%{transform:translate(1px,-2px);}75%{transform:translate(-1px,2px);}100%{transform:translate(2px,-1px);}}
+@keyframes pop{0%{transform:scale(.3);opacity:0;}60%{transform:scale(1.18);}100%{transform:scale(1);opacity:1;}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+.shake{animation:shake .45s ease !important;}
+.red-fl{animation:redfl .4s ease !important;}
+
+/* ── COMMON GAME UI ── */
+.mg-score{font-size:14px;color:#888;margin-bottom:8px;text-align:center;}
+.mg-timer-sm{font-size:32px;font-weight:900;color:#cc4444;font-variant-numeric:tabular-nums;}
+.tap-hint{font-size:11px;color:#444;margin-top:8px;text-align:center;}
+
+/* GHOST */
+.ghost-arena{position:relative;width:100%;height:290px;background:#050508;border:1px solid #111;overflow:hidden;border-radius:4px;}
+.ghost-tgt{position:absolute;font-size:42px;cursor:pointer;transition:transform .15s,opacity .15s;touch-action:manipulation;}
+
+/* CANDLE */
+.candle-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:16px;width:100%;}
+.c-item{font-size:42px;text-align:center;cursor:pointer;transition:filter .1s;touch-action:manipulation;}
+.c-item.fl{animation:flicker .28s infinite;}
+.c-item.out{filter:grayscale(1) brightness(.4);cursor:default;}
+@keyframes flicker{0%,100%{filter:brightness(1);}50%{filter:brightness(2.2) drop-shadow(0 0 10px orange);}}
+
+/* CARDS */
+.card-wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding:8px;width:100%;}
+.card{
+  aspect-ratio:1;background:#100808;border:1px solid #2a0a0a;
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;cursor:pointer;position:relative;overflow:hidden;transition:background .2s;
+}
+.card .cb{position:absolute;font-size:18px;color:#4a0a0a;transition:opacity .2s;}
+.card .cf{opacity:0;transition:opacity .2s;}
+.card.flip .cb{opacity:0;}
+.card.flip .cf{opacity:1;}
+.card.match{background:#061206;border-color:#1a4a1a;cursor:default;}
+.card.match .cf{filter:brightness(.7);}
+
+/* SPIDER */
+.spider-arena{position:relative;width:100%;height:300px;background:#05050a;border:1px solid #111;overflow:hidden;border-radius:4px;}
+.spdr{position:absolute;font-size:38px;cursor:pointer;transition:left .5s ease,top .5s ease;touch-action:manipulation;}
+
+/* NUMBER */
+.num-disp{font-size:62px;font-weight:900;color:#cc0000;text-shadow:0 0 24px #ff000088;letter-spacing:14px;min-height:80px;display:flex;align-items:center;justify-content:center;}
+.num-ans{font-size:30px;letter-spacing:10px;color:#cc6666;min-height:46px;text-align:center;margin:8px 0;}
+.num-pad{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:10px;}
+.n-btn{width:62px;height:62px;background:#100808;border:1px solid #8b0000;color:#cc4444;font-family:'Noto Serif KR',serif;font-size:20px;border-radius:6px;cursor:pointer;transition:background .1s;}
+.n-btn:active{background:#200a0a;}
+.del-btn{width:100%;max-width:200px;padding:10px;background:#0a0a18;border:1px solid #8b0000;color:#cc4444;font-family:'Noto Serif KR',serif;font-size:13px;cursor:pointer;margin-top:6px;}
+
+/* EYE */
+.eye-wrap{display:flex;align-items:center;justify-content:center;height:180px;}
+.eye-big{font-size:130px;}
+@keyframes eyeblink{0%{transform:scaleY(1);}40%{transform:scaleY(.05);}70%{transform:scaleY(1);}100%{transform:scaleY(1);}}
+.eye-blinking{animation:eyeblink .18s ease-out !important;}
+.eye-hint{font-size:13px;color:#666;text-align:center;padding:0 20px;line-height:2.2;}
+.eye-stat{font-size:18px;font-weight:700;min-height:28px;text-align:center;margin:4px 0;}
+.tap-circle{
+  width:140px;height:140px;border-radius:50%;background:#100808;
+  border:2px solid #8b0000;color:#cc0000;font-size:42px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;margin:12px auto 0;touch-action:manipulation;
+  transition:background .1s;
+}
+.tap-circle:active{background:#200a0a;}
+
+/* RHYTHM */
+.beat-row{display:flex;gap:12px;justify-content:center;align-items:center;min-height:52px;margin:8px 0;}
+.beat{width:22px;height:22px;border-radius:50%;background:#1a1a1a;transition:all .1s;}
+.beat.on{background:#cc0000;box-shadow:0 0 12px #ff0000;transform:scale(1.35);}
+.beat.hit{background:#00cc44;}
+.beat.miss{background:#cc4400;}
+.drum-btn{
+  width:130px;height:130px;border-radius:50%;background:#100808;
+  border:2px solid #8b0000;color:#cc0000;font-size:44px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;margin:16px auto;touch-action:manipulation;
+  transition:background .1s,transform .08s;
+}
+.drum-btn:active{background:#200a0a;transform:scale(.93);}
+
+/* HIDDEN */
+.hid-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:8px;width:100%;}
+.h-cell{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-size:23px;cursor:pointer;background:#05050a;border-radius:3px;touch-action:manipulation;
+  transition:background .1s;
+}
+.h-cell:active{background:#1a0a0a;}
+.h-cell.found{background:#061206;pointer-events:none;}
+.h-cell.err{animation:shake .3s ease;}
+
+/* LIE */
+.lie-list{width:calc(100% - 32px);display:flex;flex-direction:column;gap:11px;}
+.lie-opt{
+  padding:14px 16px;background:#07070f;border:1px solid #2a2a2a;
+  color:#999;font-family:'Noto Serif KR',serif;font-size:13px;
+  cursor:pointer;line-height:1.9;text-align:left;transition:border-color .2s,background .2s;
+}
+.lie-opt:active{background:#110a1a;}
+.lie-opt.correct{border-color:#006600;background:#021402;color:#44cc44;}
+.lie-opt.wrong{border-color:#660000;background:#140202;color:#cc4444;}
+
+/* DICE */
+.dice-zone{display:flex;gap:32px;justify-content:center;align-items:center;margin:14px 0;}
+.dice-col{text-align:center;}
+.dice-face{font-size:74px;min-height:84px;display:flex;align-items:center;justify-content:center;}
+.dice-lbl{font-size:12px;color:#555;margin-top:4px;}
+.dice-vs{font-size:22px;color:#cc0000;font-weight:900;}
+.score-row{font-size:13px;color:#666;text-align:center;margin:6px 0;}
+.bet-row{display:flex;gap:8px;justify-content:center;margin:8px 0;}
+.bet-btn{padding:8px 14px;background:#100808;border:1px solid #8b0000;color:#cc4444;font-family:'Noto Serif KR',serif;font-size:12px;cursor:pointer;transition:background .1s;}
+.bet-btn.sel{background:#8b000033;border-color:#cc0000;}
+.bet-btn:active{background:#200a0a;}
+.roll-btn{
+  width:calc(100% - 48px);padding:14px;background:#8b0000;border:none;
+  color:#fff;font-family:'Noto Serif KR',serif;font-size:15px;
+  cursor:pointer;margin:8px 24px;letter-spacing:2px;transition:background .1s;
+}
+.roll-btn:active{background:#660000;}
+.roll-btn:disabled{background:#2a1010;color:#555;cursor:default;}
+.dice-msg{font-size:13px;color:#cc4444;text-align:center;min-height:24px;margin-top:4px;}
+
+/* SPECIAL overlay */
+.special-vfx{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  background:radial-gradient(ellipse at center,#cc000018 0%,transparent 70%);
+  pointer-events:none;z-index:51;animation:spvfx 2s ease-in-out infinite;
+}
+@keyframes spvfx{0%,100%{opacity:.5;}50%{opacity:1;}}
+</style>
+</head>
+<body>
+<div id="G">
+  <div id="noise"></div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <span id="hud-stage">STAGE 1</span>
+    <div id="hud-hp"></div>
+    <span id="hud-timer">05:00</span>
+  </div>
+
+  <!-- TITLE -->
+  <div id="s-title" class="scr on">
+    <div class="t-doll">🪆</div>
+    <div class="t-main">인형이 된 나</div>
+    <div class="t-sub">666 STAGES OF DAMNATION</div>
+    <button class="btn pri" onclick="G.newGame()">새 게임 시작</button>
+    <button class="btn" id="cont-btn" style="display:none" onclick="G.continueGame()">이어하기</button>
+    <div class="t-note">스테이지 666개 중 1~10단계 구현 (v1.0)</div>
+  </div>
+
+  <!-- INTRO -->
+  <div id="s-intro" class="scr">
+    <div class="loc-badge" id="intro-loc">📍 내 방</div>
+    <div class="demon-emo" id="intro-emo">👹</div>
+    <div class="demon-nm" id="intro-nm">???</div>
+    <div class="demon-rk" id="intro-rk">하급 악마</div>
+    <div class="dlg-box" id="dlg-box" onclick="G.skipType()">
+      <span id="dlg-text"></span><span class="dlg-cursor" id="dlg-cur"></span>
+    </div>
+    <div class="mg-preview">
+      <div class="mg-preview-ico" id="prev-ico">❓</div>
+      <div class="mg-preview-nm" id="prev-nm">미니게임 로딩 중...</div>
+    </div>
+    <button class="btn pri" id="intro-start" onclick="G.launchMg()">▶ 게임 시작</button>
+    <div style="height:20px"></div>
+  </div>
+
+  <!-- MINIGAME -->
+  <div id="s-mg" class="scr">
+    <div class="mg-hdr">
+      <div class="mg-title" id="mg-title">—</div>
+      <div class="mg-countdown" id="mg-cd">30</div>
+      <div class="mg-bar"><div class="mg-bar-fill" id="mg-bar" style="width:100%"></div></div>
+    </div>
+    <div class="mg-body" id="mg-body"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="s-result" class="scr">
+    <div class="res-ico" id="r-ico">🎉</div>
+    <div class="res-title" id="r-title" style="color:#44cc44">클리어!</div>
+    <div class="res-msg" id="r-msg"></div>
+    <div class="res-hp" id="r-hp"></div>
+    <button class="btn pri" id="r-btn" onclick="G.onResult()">—</button>
+  </div>
+
+  <!-- GAMEOVER -->
+  <div id="s-over" class="scr">
+    <div style="font-size:74px;margin-bottom:18px">💀</div>
+    <div style="font-size:22px;color:#cc0000;font-weight:900;margin-bottom:14px">넌 인형이 되었다</div>
+    <div style="font-size:13px;color:#555;text-align:center;padding:0 28px;line-height:2.2;margin-bottom:32px">
+      5분이 지났다.<br>영혼은 인형 속에 영원히 갇혔다.<br>탈출은 실패했다.
+    </div>
+    <button class="btn pri" onclick="G.resetGame()">처음으로</button>
+  </div>
+
+  <!-- STAGE CLEAR OVERLAY -->
+  <div id="clear-ov">
+    <div class="clear-txt" id="cl-txt">STAGE CLEAR</div>
+    <div class="clear-sub" id="cl-sub"></div>
+  </div>
+
+  <!-- STORY POPUP -->
+  <div id="story-pop">
+    <div style="font-size:44px;margin-bottom:14px">📖</div>
+    <div class="story-title" id="st-title">스토리</div>
+    <div class="story-body" id="st-body"></div>
+    <button class="btn pri" onclick="G.closeStory()">계속하기 ▶</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════════════
+const STAGES = [null,
+  {loc:'📍 내 방',bg:'night',
+   demon:{e:'👺',nm:'푸',rk:'하급 악마',c:'#cc5544'},
+   dlg:'...호호. 작은 인형이 깨어났군.\n내 게임을 이기면 다음 방으로 가게 해주지.\n실패하면... 넌 영원히 내 거야.',
+   game:'ghost',special:false},
+
+  {loc:'📍 내 방',bg:'night',
+   demon:{e:'🧟',nm:'지지',rk:'하급 악마',c:'#aa4444'},
+   dlg:'으으... 내 촛불을 꺼봐.\n빛나는 것만 탭해야 해.\n어디 할 수 있겠어? 호호홋.',
+   game:'candle',special:false},
+
+  {loc:'📍 내 방',bg:'night',
+   demon:{e:'🎭',nm:'꼬꼬',rk:'하급 악마',c:'#aa5544'},
+   dlg:'카드 게임 못 이기면 여기서 끝이야!\n같은 카드 쌍을 찾아봐,\n쪼꼬마 인형아!',
+   game:'card',special:false},
+
+  {loc:'📍 거실',bg:'night',
+   demon:{e:'🕷️',nm:'버름',rk:'하급 악마',c:'#8b5544'},
+   dlg:'거실에 온 걸 환영해...\n내 거미들이 많이 배고프거든.\n전부 밟아버려. 할 수 있으면.',
+   game:'spider',special:false},
+
+  {loc:'📍 거실',bg:'night',
+   demon:{e:'💀',nm:'해골',rk:'하급 악마',c:'#7a4444'},
+   dlg:'숫자를 기억해. 그게 전부야.\n간단하지? ...아니면 그렇게 생각하겠지.',
+   game:'number',special:false},
+
+  {loc:'📍 거실 — 6번째 방',bg:'dawn',
+   demon:{e:'😈',nm:'6의 사도',rk:'스페셜 악마 ★',c:'#ff2222'},
+   dlg:'하하하하하!!\n6번째 방까지 왔군.\n넌 이미 반쯤 녹아든 거야, 인형 속에.\n내 거짓말 속에서 진실을 찾아봐.\n그게 가능하다면.',
+   game:'lie',special:true},
+
+  {loc:'📍 부엌',bg:'dawn',
+   demon:{e:'👁️',nm:'크크',rk:'중급 악마',c:'#cc2222'},
+   dlg:'내 눈을 봐. 계속 봐.\n깜빡이면 즉시 탭해.\n하지만 안 깜빡일 때 탭하면... 넌 끝이야.',
+   game:'eye',special:false},
+
+  {loc:'📍 복도',bg:'dawn',
+   demon:{e:'🎵',nm:'쉬쉬',rk:'중급 악마',c:'#bb2222'},
+   dlg:'내 박자를 따라해봐.\n어둠 속의 리듬...\n정확히 따라해. 틀리면 안 돼.',
+   game:'rhythm',special:false},
+
+  {loc:'📍 부엌·복도',bg:'dawn',
+   demon:{e:'🔍',nm:'벌름',rk:'중급 악마',c:'#aa2222'},
+   dlg:'그리드 속에 숨어있어.\n내가 원하는 걸 찾아봐.\n하나라도 놓치면 안 돼.',
+   game:'hidden',special:false},
+
+  {loc:'📍 욕실 — 보스방',bg:'dawn',
+   demon:{e:'🛁',nm:'욕탕귀',rk:'중급 강화형 보스 ☆',c:'#ff1111'},
+   dlg:'...드디어 여기까지 왔군.\n욕탕 속에서 기다리고 있었어.\n주사위 한 판 하자.\n이기면 다음 구역으로 보내줄게.\n대신... 져도 책임은 안 져.',
+   game:'dice',special:false,boss:true},
+];
+
+const STORIES = {
+  6:{
+    title:'— 이야기 요약 —',
+    body:`3일 전, 길에서 낡은 인형을 주웠다.
+작은 도자기 인형.
+이상하게 버리기가 싫었다.
+
+그날 밤부터 꿈이 이상해졌다.
+검은 복도, 촛불, 그리고 웃음소리.
+
+13일의 금요일 자정.
+눈을 떠보니 천장이 거대하게 보였다.
+내 손은 도자기였다.
+영혼이 인형 속에 갇혔다.
+
+지금은 6번째 악마를 넘어섰다.
+집을 수색해 흑막을 찾아야 한다.`
+  }
+};
+
+const PREVIEW = {
+  ghost:  ['👻','영혼 잡기'],
+  candle: ['🕯️','촛불 끄기'],
+  card:   ['🃏','악마 카드 짝맞추기'],
+  spider: ['🕷️','거미 밟기'],
+  number: ['🔢','저주 숫자 기억'],
+  lie:    ['😈','악마의 거짓말'],
+  eye:    ['👁️','눈 깜빡임 버티기'],
+  rhythm: ['🎵','박자 따라치기'],
+  hidden: ['🔍','숨은그림찾기'],
+  dice:   ['🎲','저주 주사위'],
+};
+
+const DICE_F = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+const CARD_E = ['👻','💀','🕷️','🩸','🔮','🗝️','🕯️','😈'];
+
+// ═══════════════════════════════════════════════════════════
+//  ENGINE
+// ═══════════════════════════════════════════════════════════
+const G = {
+  st: {stage:1,hp:5,maxHp:5,cleared:[],win:false},
+  stageLeft: 300,
+  _stageT: null, _mgT: null, _typeT: null,
+  mg: null, // per-game state
+
+  // ── INIT ──
+  init(){
+    if(localStorage.getItem('dollSave'))
+      document.getElementById('cont-btn').style.display='inline-block';
+    this.show('title');
+  },
+
+  newGame(){
+    this.st={stage:1,hp:5,maxHp:5,cleared:[],win:false};
+    this.save();
+    this.goStage(1);
+  },
+  continueGame(){
+    const d=localStorage.getItem('dollSave');
+    if(d){this.st=JSON.parse(d);this.goStage(this.st.stage);}
+  },
+  save(){localStorage.setItem('dollSave',JSON.stringify(this.st));},
+  resetGame(){
+    localStorage.removeItem('dollSave');
+    this.stopAll();
+    document.getElementById('hud').style.display='none';
+    document.getElementById('cont-btn').style.display='none';
+    // remove special vfx
+    const vfx=document.getElementById('G').querySelector('.special-vfx');
+    if(vfx)vfx.remove();
+    this.show('title');
+  },
+
+  // ── SCREENS ──
+  show(nm){
+    document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+    document.getElementById('s-'+nm).classList.add('on');
+  },
+
+  // ── STAGE ──
+  goStage(n){
+    if(n>10){this.endAll();return;}
+    this.st.stage=n;
+    this.stageLeft=300;
+    this.save();
+    this.showHUD();
+    this.updateHUD();
+    this.startStageTimer();
+    this.showIntro(n);
+  },
+
+  showHUD(){document.getElementById('hud').style.display='flex';},
+
+  updateHUD(){
+    document.getElementById('hud-stage').textContent='STAGE '+this.st.stage;
+    const hp=document.getElementById('hud-hp');
+    hp.innerHTML='';
+    for(let i=0;i<this.st.maxHp;i++){
+      const s=document.createElement('span');
+      s.textContent=i<this.st.hp?'❤️':'🖤';
+      hp.appendChild(s);
+    }
+    this.updateTimerUI();
+  },
+  updateTimerUI(){
+    const m=Math.floor(this.stageLeft/60),s=this.stageLeft%60;
+    const el=document.getElementById('hud-timer');
+    el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    el.classList.toggle('danger',this.stageLeft<=60);
+  },
+
+  startStageTimer(){
+    clearInterval(this._stageT);
+    this._stageT=setInterval(()=>{
+      this.stageLeft--;
+      this.updateTimerUI();
+      if(this.stageLeft<=0){
+        clearInterval(this._stageT);
+        this.stopMgTimer();
+        this.show('over');
+        document.getElementById('hud').style.display='none';
+      }
+    },1000);
+  },
+
+  stopAll(){
+    clearInterval(this._stageT);
+    clearInterval(this._mgT);
+    clearTimeout(this._typeT);
+    this._stageT=this._mgT=this._typeT=null;
+  },
+  stopMgTimer(){clearInterval(this._mgT);this._mgT=null;},
+
+  setBackground(bg){
+    const c={night:'#0a0a0f',dawn:'#0d0d1a',day:'#1a1a2e'};
+    document.getElementById('G').style.background=c[bg]||c.night;
+  },
+
+  // ── EFFECTS ──
+  shake(){
+    const g=document.getElementById('G');
+    g.classList.remove('shake');void g.offsetWidth;
+    g.classList.add('shake');
+    setTimeout(()=>g.classList.remove('shake'),460);
+  },
+  redFlash(){
+    const g=document.getElementById('G');
+    g.classList.remove('red-fl');void g.offsetWidth;
+    g.classList.add('red-fl');
+    setTimeout(()=>g.classList.remove('red-fl'),420);
+  },
+
+  // ── INTRO ──
+  showIntro(n){
+    const d=STAGES[n];
+    this.setBackground(d.bg);
+    this.show('intro');
+
+    document.getElementById('intro-loc').textContent=d.loc;
+    document.getElementById('intro-emo').textContent=d.demon.e;
+    document.getElementById('intro-nm').textContent=d.demon.nm;
+    document.getElementById('intro-nm').style.color=d.demon.c;
+    document.getElementById('intro-rk').textContent=d.demon.rk;
+
+    const [ico,nm]=PREVIEW[d.game]||['❓','???'];
+    document.getElementById('prev-ico').textContent=ico;
+    document.getElementById('prev-nm').textContent=nm;
+    document.getElementById('mg-title').textContent=nm;
+
+    document.getElementById('intro-start').style.display='none';
+    document.getElementById('dlg-cur').style.display='inline-block';
+
+    // Special stage VFX
+    const g=document.getElementById('G');
+    const old=g.querySelector('.special-vfx');
+    if(old)old.remove();
+    if(d.special){
+      const vfx=document.createElement('div');
+      vfx.className='special-vfx';
+      g.appendChild(vfx);
+      this.redFlash();this.shake();
+    }
+
+    this._fullText=d.dlg;
+    this._typeIdx=0;
+    document.getElementById('dlg-text').textContent='';
+    clearTimeout(this._typeT);
+    this._typeNext();
+  },
+
+  _typeNext(){
+    const el=document.getElementById('dlg-text');
+    if(!el)return;
+    if(this._typeIdx<this._fullText.length){
+      el.textContent+=this._fullText[this._typeIdx++];
+      this._typeT=setTimeout(()=>this._typeNext(),32);
+    }else{
+      document.getElementById('dlg-cur').style.display='none';
+      document.getElementById('intro-start').style.display='inline-block';
+    }
+  },
+
+  skipType(){
+    if(this._typeIdx<(this._fullText||'').length){
+      clearTimeout(this._typeT);
+      document.getElementById('dlg-text').textContent=this._fullText;
+      this._typeIdx=this._fullText.length;
+      document.getElementById('dlg-cur').style.display='none';
+      document.getElementById('intro-start').style.display='inline-block';
+    }
+  },
+
+  // ── LAUNCH MG ──
+  launchMg(){
+    this.show('mg');
+    const n=this.st.stage;
+    const gn=STAGES[n].game;
+    this.mg={};
+    const fn={
+      ghost:()=>this.mgGhost(n),
+      candle:()=>this.mgCandle(n),
+      card:()=>this.mgCard(n),
+      spider:()=>this.mgSpider(n),
+      number:()=>this.mgNumber(n),
+      lie:()=>this.mgLie(n),
+      eye:()=>this.mgEye(n),
+      rhythm:()=>this.mgRhythm(n),
+      hidden:()=>this.mgHidden(n),
+      dice:()=>this.mgDice(n),
+    };
+    if(fn[gn])fn[gn]();
+  },
+
+  // ── MG TIMER ──
+  startMgTimer(sec,onEnd){
+    let left=sec;
+    document.getElementById('mg-cd').textContent=left;
+    document.getElementById('mg-bar').style.width='100%';
+    document.getElementById('mg-bar').style.transition='none';
+    clearInterval(this._mgT);
+    this._mgT=setInterval(()=>{
+      left--;
+      document.getElementById('mg-cd').textContent=left;
+      const pct=(left/sec)*100;
+      document.getElementById('mg-bar').style.transition='width 1s linear';
+      document.getElementById('mg-bar').style.width=pct+'%';
+      if(left<=0){clearInterval(this._mgT);this._mgT=null;if(onEnd)onEnd();}
+    },1000);
+  },
+
+  // ── WIN / LOSE ──
+  win(){
+    this.stopMgTimer();
+    const n=this.st.stage;
+    this.st.cleared.push(n);
+    this.st.win=true;
+    this.save();
+
+    document.getElementById('cl-txt').textContent=STAGES[n].boss?'BOSS CLEAR!':'STAGE CLEAR';
+    document.getElementById('cl-txt').style.color=STAGES[n].boss?'#ff6600':'#cc0000';
+    document.getElementById('cl-sub').textContent=`Stage ${n} 클리어! 다음 단계로...`;
+    const ov=document.getElementById('clear-ov');
+    ov.classList.add('on');
+
+    setTimeout(()=>{
+      ov.classList.remove('on');
+      if(STORIES[n]) this.showStory(n);
+      else this.showResult(true);
+    },1900);
+  },
+
+  lose(msg){
+    this.stopMgTimer();
+    this.st.hp--;
+    this.st.win=false;
+    this.updateHUD();
+    this.save();
+    this.shake();this.redFlash();
+
+    if(this.st.hp<=0){
+      this.stopAll();
+      document.getElementById('hud').style.display='none';
+      this.show('over');
+      return;
+    }
+    this.showResult(false,msg);
+  },
+
+  showResult(ok,msg){
+    this.show('result');
+    document.getElementById('r-ico').textContent=ok?'✨':'💔';
+    const t=document.getElementById('r-title');
+    const m=document.getElementById('r-msg');
+    const b=document.getElementById('r-btn');
+    const h=document.getElementById('r-hp');
+
+    if(ok){
+      t.textContent='클리어!';t.style.color='#44cc44';
+      m.textContent=STAGES[this.st.stage].boss
+        ?'보스를 처치했다!\n다음 구역으로 진입한다...'
+        :'악마의 게임을 이겼다.\n다음 방으로 이동한다.';
+      b.textContent='다음 스테이지 ▶';
+    }else{
+      t.textContent='실패...';t.style.color='#cc0000';
+      m.textContent=(msg||'악마에게 졌다.')+`\n\n남은 HP: ${this.st.hp} / ${this.st.maxHp}`;
+      b.textContent='재도전 ↺';
+    }
+    h.textContent='';
+    for(let i=0;i<this.st.maxHp;i++)h.textContent+=(i<this.st.hp?'❤️':'🖤');
+  },
+
+  onResult(){
+    if(this.st.win) this.goStage(this.st.stage+1);
+    else this.showIntro(this.st.stage);
+  },
+
+  showStory(n){
+    const s=STORIES[n];
+    document.getElementById('st-title').textContent=s.title;
+    document.getElementById('st-body').textContent=s.body;
+    document.getElementById('story-pop').classList.add('on');
+  },
+  closeStory(){
+    document.getElementById('story-pop').classList.remove('on');
+    this.showResult(true);
+  },
+
+  endAll(){
+    this.stopAll();
+    document.getElementById('hud').style.display='none';
+    this.show('result');
+    document.getElementById('r-ico').textContent='🏆';
+    document.getElementById('r-title').textContent='1단계 완료!';
+    document.getElementById('r-title').style.color='#ffaa00';
+    document.getElementById('r-msg').textContent='Stage 1~10을 모두 클리어했다!\n\n다음 구역(거실 심층부)은 준비 중...';
+    document.getElementById('r-btn').textContent='처음으로';
+    document.getElementById('r-btn').onclick=()=>this.resetGame();
+    document.getElementById('r-hp').textContent='';
+  },
+
+  // ═══════════════════════════════════════════════════════
+  //  MINI-GAMES
+  // ═══════════════════════════════════════════════════════
+
+  // ── 1. GHOST ──
+  mgGhost(n){
+    const needed=n<=3?8:12, sec=n<=3?22:18;
+    let caught=0, spawner=null;
+    const body=document.getElementById('mg-body');
+    body.innerHTML=`
+      <div class="mg-score">잡은 수: <span id="gc">0</span> / ${needed}</div>
+      <div class="ghost-arena" id="g-arena"></div>
+      <div class="tap-hint">날아다니는 👻를 탭하세요!</div>`;
+
+    const arena=document.getElementById('g-arena');
+    const spawn=()=>{
+      if(!document.getElementById('g-arena'))return;
+      const el=document.createElement('div');
+      el.className='ghost-tgt';
+      el.textContent=['👻','💀','🤡','👾'][Math.floor(Math.random()*4)];
+      el.style.cssText=`left:${Math.random()*82}%;top:${Math.random()*80}%;`;
+      el.ontouchstart=el.onclick=()=>{
+        caught++;
+        document.getElementById('gc').textContent=caught;
+        el.style.transform='scale(0)';el.style.opacity='0';
+        setTimeout(()=>el.remove(),180);
+        if(caught>=needed){this.stopMgTimer();clearInterval(spawner);this.win();}
+      };
+      arena.appendChild(el);
+      setTimeout(()=>{if(el.parentNode)el.remove();},1800+Math.random()*900);
+    };
+    spawn();spawner=setInterval(spawn,750);
+    this.startMgTimer(sec,()=>{clearInterval(spawner);this.lose('시간 초과! 유령을 충분히 잡지 못했다.');});
+  },
+
+  // ── 2. CANDLE ──
+  mgCandle(n){
+    const total=n<=3?8:12;
+    let ext=0, fInterval=null;
+    const body=document.getElementById('mg-body');
+    body.innerHTML=`
+      <div class="mg-score">꺼진 촛불: <span id="cc2">0</span> / ${total}</div>
+      <div class="candle-grid" id="cg"></div>
+      <div class="tap-hint">빛나는(깜빡이는) 🕯️만 탭하세요!</div>`;
+    const grid=document.getElementById('cg');
+    const items=[];
+    for(let i=0;i<total;i++){
+      const c=document.createElement('div');
+      c.className='c-item';c.textContent='🕯️';
+      c.ontouchstart=c.onclick=()=>{
+        if(!c.classList.contains('fl')||c.classList.contains('out'))return;
+        c.classList.remove('fl');c.classList.add('out');c.textContent='🕯';
+        ext++;document.getElementById('cc2').textContent=ext;
+        if(ext>=total){this.stopMgTimer();clearInterval(fInterval);this.win();}
+      };
+      grid.appendChild(c);items.push(c);
+    }
+    // start 3 flickering
+    [0,2,5].forEach(i=>items[i]&&items[i].classList.add('fl'));
+    fInterval=setInterval(()=>{
+      const off=items.filter(c=>!c.classList.contains('fl')&&!c.classList.contains('out'));
+      const on=items.filter(c=>c.classList.contains('fl'));
+      if(off.length&&on.length<4){
+        const c=off[Math.floor(Math.random()*off.length)];
+        c.classList.add('fl');
+        setTimeout(()=>{if(!c.classList.contains('out'))c.classList.remove('fl');},1100+Math.random()*700);
+      }
+    },450);
+    this.startMgTimer(28,()=>{clearInterval(fInterval);this.lose('시간 초과! 촛불을 다 끄지 못했다.');});
+  },
+
+  // ── 3. CARD ──
+  mgCard(n){
+    const pairs=n<=3?4:6;
+    const deck=[...CARD_E.slice(0,pairs),...CARD_E.slice(0,pairs)].sort(()=>Math.random()-.5);
+    let flipped=[],matched=0,lock=false;
+    const body=document.getElementById('mg-body');
+    body.innerHTML=`
+      <div class="mg-score">맞춘 쌍: <span id="cm">0</span> / ${pairs}</div>
+      <div class="card-wrap" id="cw"></div>`;
+    const wrap=document.getElementById('cw');
+    deck.forEach((e,i)=>{
+      const c=document.createElement('div');
+      c.className='card';
+      c.innerHTML=`<div class="cb">🔮</div><div class="cf">${e}</div>`;
+      c.dataset.e=e;
+      c.ontouchstart=c.onclick=()=>{
+        if(lock||c.classList.contains('flip')||c.classList.contains('match'))return;
+        c.classList.add('flip');flipped.push(c);
+        if(flipped.length===2){
+          lock=true;
+          setTimeout(()=>{
+            if(flipped[0].dataset.e===flipped[1].dataset.e){
+              flipped.forEach(x=>x.classList.add('match'));
+              matched++;document.getElementById('cm').textContent=matched;
+              if(matched>=pairs){this.stopMgTimer();this.win();}
+            }else{
+              this.shake();
+              flipped.forEach(x=>x.classList.remove('flip'));
+            }
+            flipped=[];lock=false;
+          },820);
+        }
+      };
+      wrap.appendChild(c);
+    });
+    this.startMgTimer(pairs<=4?32:48,()=>this.lose('시간 초과! 카드를 다 맞추지 못했다.'));
+  },
+
+  // ── 4. SPIDER ──
+  mgSpider(n){
+    const needed=10,maxMiss=3,sec=30;
+    let stomped=0,missed=0,spawner=null,done=false;
+    const body=document.getElementById('mg-body');
+    body.innerHTML=`
+      <div class="mg-score">밟음: <span id="ss">0</span>/${needed} | 놓침: <span id="sm">0</span>/${maxMiss}</div>
+      <div class="spider-arena" id="sa"></div>
+      <div class="tap-hint">🕷️을 탭하세요! ${maxMiss}번 놓치면 실패.</div>`;
+    const arena=document.getElementById('sa');
+    const spawn=()=>{
+      if(done||!document.getElementById('sa'))return;
+      const el=document.createElement('div');
+      el.className='spdr';el.textContent='🕷️';
+      el.style.cssText=`left:${Math.random()*83}%;top:${Math.random()*83}%;font-size:${32+Math.random()*14}px;`;
+      let alive=true;
+      el.ontouchstart=el.onclick=()=>{
+        if(!alive)return;alive=false;el.remove();
+        stomped++;document.getElementById('ss').textContent=stomped;
+        if(stomped>=needed&&!done){done=true;this.stopMgTimer();clearInterval(spawner);this.win();}
+      };
+      arena.appendChild(el);
+      // random movement
+      const mv=setInterval(()=>{
+        if(!alive){clearInterval(mv);return;}
+        el.style.left=Math.random()*83+'%';
+        el.style.top=Math.random()*83+'%';
+      },600);
+      setTimeout(()=>{
+        if(alive&&el.parentNode){
+          alive=false;el.remove();clearInterval(mv);
+          if(done)return;
+          missed++;
+          const mEl=document.getElementById('sm');
+          if(mEl)mEl.textContent=missed;
+          if(missed>=maxMiss){done=true;this.stopMgTimer();clearInterval(spawner);this.lose('거미를 너무 많이 놓쳤다!');}
+        }
+      },1600+Math.random()*800);
+    };
+    spawn();spawn();
+    spawner=setInterval(spawn,720);
+    this.startMgTimer(sec,()=>{if(!done){done=true;clearInterval(spawner);this.lose('시간 초과!');}});
+  },
+
+  // ── 5. NUMBER ──
+  mgNumber(n){
+    const len=n<=5?4:6;
+    const nums=Array.from({length:len},()=>Math.floor(Math.random()*10));
+    this.mg={nums,ans:[],len};
+    const body=document.getElementById('mg-body');
+    body.innerHTML=`
+      <div style="font-size:13px;color:#555;margin-bottom:8px" id="ni">숫자를 기억하세요...</div>
+      <div class="num-disp" id="nd">${nums.join('  ')}</div>
+      <div class="num-ans" id="na">${'_ '.repeat(len).trim()}</div>
+      <div class="num-pad" id="np" style="display:none"></div>
+      <button class="del-btn" id="del-b" style="display:none" onclick="G.numDel()">← 지우기</button>`;
+    document.getElementById('mg-cd').textContent='기억 중';
+    document.getElementById('mg-bar').style.width='100%';
+    setTimeout(()=>{
+      document.getElementById('nd').textContent='?  '.repeat(len).trim();
+      document.getElementById('ni').textContent='기억한 순서대로 입력하세요!';
+      const pad=document.getElementById('np');
+      pad.style.display='flex';
+      document.getElementById('del-b').style.display='inline-block';
+      for(let i=0;i<=9;i++){
+        const b=document.createElement('button');
+        b.className='n-btn';b.textContent=i;
+        b.ontouchstart=b.onclick=()=>this.numInput(i);
+        pad.appendChild(b);
+      }
+      this.startMgTimer(22,()=>this.lose('시간 초과! 숫자를 입력하지 못했다.'));
+    },3200);
+  },
+  numInput(v){
+    if(!this.mg||this.mg.ans.length>=this.mg.len)return;
+    this.mg.ans.push(v);this.numRender();
+    if(this.mg.ans.length===this.mg.len){
+      const ok=this.mg.ans.join('')===this.mg.nums.join('');
+      setTimeout(()=>{
+        if(ok){this.stopMgTimer();this.win();}
+        else{
+          this.shake();
+          this.mg.ans=[];this.numRender();
+          const nd=document.getElementById('nd');
+          if(nd){nd.textContent='틀렸다!';nd.style.color='#ff4444';
+            setTimeout(()=>{nd.textContent='?  '.repeat(this.mg.len).trim();nd.style.color='#cc0000';},600);}
+        }
+      },150);
+    }
+  },
+  numDel(){if(this.mg){this.mg.ans.pop();this.numRender();}},
+  numRender(){
+    const el=document.getElementById('na');
+    if(!el||!this.mg)return;
+    let t='';
+    for(let i=0;i<this.mg.len;i++)t+=(this.mg.ans[i]!==undefined?this.mg.ans[i]:'_')+' ';
+    el.textContent=t.trim();
+  },
+
+  // ── 6. LIE ──
+  mgLie(n){
+    this.redFlash();this.shake();
+    const sets=[
+      {opts:['인형은 13년 전 이 집에서 만들어졌다.','검은 안개는 북쪽 창문에서 들어온다.','첫 번째 열쇠는 욕실 거울 뒤에 있다.'],ans:0,hint:'인형의 기원에 관해'},
+      {opts:['악마들은 달이 뜨면 힘이 약해진다.','너의 진짜 몸은 아직 침대에 있다.','666번째 스테이지는 절대 클리어할 수 없다.'],ans:1,hint:'현재 상황에 관해'},
+      {opts:['인형을 불에 태우면 영혼이 해방된다.','흑막은 지하실에 있다.','이 집에는 출구가 없다.'],ans:0,hint:'탈출 방법에 관해'},
+    ];
+    const q=sets[Math.floor(Math.random()*sets.length)];
+    let answered=false;
+    const body=document.getElementById('mg-body');
+    body.innerHTML=`
+      <div style="font-size:13px;color:#555;text-align:center;padding:0 16px;line-height:2;margin-bottom:14px">
+        😈의 말 중 <strong style="color:#cc4444">진실은 단 하나</strong>.<br>골라라. 힌트: ${q.hint}
+      </div>
+      <div class="lie-list" id="ll"></div>`;
+    document.getElementById('mg-cd').textContent='∞';
+    document.getElementById('mg-bar').style.width='100%';
+    const ll=document.getElementById('ll');
+    q.opts.forEach((txt,i)=>{
+      const b=document.createElement('button');
+      b.className='lie-opt';b.textContent=`${i+1}. ${txt}`;
+      b.ontouchstart=b.onclick=()=>{
+        if(answered)return;answered=true;this.stopMgTimer();
+        if(i===q.ans){b.classList.add('correct');setTimeout(()=>this.win(),900);}
+        else{b.classList.add('wrong');ll.children[q.ans].classList.add('correct');this.redFlash();setTimeout(()=>this.lose('거짓말에 속았다!'),900);}
+      };
+      ll.appendChild(b);
+    });
+  },
+
+  // ── 7. EYE ──
+  mgEye(n){
+    const needed=6,maxWrong=2,sec=30;
+    this.mg={score:0,wrong:0,needed,maxWrong,blinking:false,done:false};
+    const body=document.getElementById('mg-body');
+    body.innerHTML=`
+      <div class="eye-hint">눈이 <strong style="color:#cc4444">깜빡이면</strong> 즉시 탭!<br>안 깜빡일 때 탭 → 실수</div>
+      <div class="eye-wrap"><div class="eye-big" id="the-eye">👁️</div></div>
+      <div class="eye-stat" id="eye-st" style="color:#555">준비...</div>
+      <div style="font-size:12px;color:#444;text-align:center">
+        성공: <span id="e-sc">0</span>/${needed} | 실수: <span id="e-wr">0</span>/${maxWrong}
+      </div>
+      <div class="tap-circle" ontouchstart="G.eyeTap()" onclick="G.eyeTap()">탭!</div>`;
+    const sched=()=>{
+      if(this.mg.done)return;
+      setTimeout(()=>{
+        if(this.mg.done)return;
+        const eye=document.getElementById('the-eye');const st=document.getElementById('eye-st');
+        if(!eye)return;
+        this.mg.blinking=true;
+        eye.classList.add('eye-blinking');
+        if(st){st.textContent='👁 깜빡!';st.style.color='#ff4444';}
+        setTimeout(()=>{
+          if(!this.mg)return;
+          this.mg.blinking=false;
+          const e2=document.getElementById('the-eye');const s2=document.getElementById('eye-st');
+          if(e2)e2.classList.remove('eye-blinking');
+          if(s2){s2.textContent='...';s2.style.color='#444';}
+          if(!this.mg.done)sched();
+        },350);
+      },1400+Math.random()*2200);
+    };
+    sched();
+    this.startMgTimer(sec,()=>{if(this.mg)this.mg.done=true;this.lose('시간 초과!');});
+  },
+  eyeTap(){
+    if(!this.mg||this.mg.done)return;
+    if(this.mg.blinking){
+      this.mg.score++;
+      const sc=document.getElementById('e-sc');if(sc)sc.textContent=this.mg.score;
+      const st=document.getElementById('eye-st');if(st){st.textContent='✓ 성공!';st.style.color='#44cc44';}
+      if(this.mg.score>=this.mg.needed){this.mg.done=true;this.stopMgTimer();this.win();}
+    }else{
+      this.mg.wrong++;
+      const wr=document.getElementById('e-wr');if(wr)wr.textContent=this.mg.wrong;
+      const st=document.getElementById('eye-st');if(st){st.textContent='✗ 실수!';st.style.color='#ff4444';}
+      this.shake();
+      if(this.mg.wrong>=this.mg.maxWrong){this.mg.done=true;this.stopMgTimer();this.lose('잘못된 타이밍에 탭했다!');}
+    }
+  },
+
+  // ── 8. RHYTHM ──
+  mgRhythm(n){
+    const pLen=n<=8?5:7;
+    // generate pattern with at least 2 taps
+    let pat=Array.from({length:pLen},()=>Math.random()>.4?1:0);
+    if(pat.filter(x=>x).length<2){pat[0]=1;pat[1]=1;}
+    this.mg={pat,phase:'show',idx:0,correct:0,wrong:0,maxWrong:2,done:false,beatActive:false};
+    const body=document.getElementById('mg-body');
+    body.innerHTML=`
+      <div style="font-size:13px;color:#555;text-align:center;margin-bottom:8px" id="ri">악마의 박자를 기억하라...</div>
+      <div class="beat-row" id="br"></div>
+      <div class="drum-btn" ontouchstart="G.drumTap()" onclick="G.drumTap()">🥁</div>
+      <div style="font-size:12px;color:#444;text-align:center">
+        정확: <span id="r-cor">0</span> | 실수: <span id="r-err">0</span>/${this.mg.maxWrong}
+      </div>`;
+    document.getElementById('mg-cd').textContent='기억 중';
+    document.getElementById('mg-bar').style.width='100%';
+    const br=document.getElementById('br');
+    pat.forEach(()=>{const b=document.createElement('div');b.className='beat';br.appendChild(b);});
+
+    // SHOW PHASE: light up beats one by one
+    let si=0;
+    const showNext=()=>{
+      const beats=[...br.querySelectorAll('.beat')];
+      beats.forEach(b=>b.classList.remove('on'));
+      if(si>=pLen){
+        setTimeout(()=>this.rhythmStartTap(),600);
+        return;
+      }
+      if(pat[si]===1){beats[si].classList.add('on');this.shake();}
+      si++;
+      setTimeout(showNext,700);
+    };
+    setTimeout(showNext,800);
+  },
+
+  rhythmStartTap(){
+    if(!this.mg)return;
+    this.mg.phase='tap';this.mg.idx=0;
+    document.getElementById('ri').textContent='이제 같은 박자로 탭하라!';
+    const br=document.getElementById('br');
+    if(!br)return;
+    const beats=[...br.querySelectorAll('.beat')];
+    beats.forEach(b=>b.classList.remove('on'));
+
+    let ti=0;
+    const nextBeat=()=>{
+      if(!this.mg||this.mg.done)return;
+      if(ti>=this.mg.pat.length){
+        // finished — check enough correct
+        const expTaps=this.mg.pat.filter(x=>x).length;
+        setTimeout(()=>{
+          if(this.mg&&!this.mg.done){
+            this.mg.done=true;this.stopMgTimer();
+            if(this.mg.correct>=expTaps-1)this.win();
+            else this.lose('리듬을 제대로 따라하지 못했다!');
+          }
+        },400);
+        return;
+      }
+      const beats2=document.getElementById('br')?.querySelectorAll('.beat');
+      if(beats2){beats2.forEach(b=>b.classList.remove('on'));}
+      this.mg.idx=ti;
+      this.mg.beatActive=(this.mg.pat[ti]===1);
+      if(this.mg.beatActive&&beats2)beats2[ti]?.classList.add('on');
+      ti++;
+      setTimeout(nextBeat,750);
+    };
+    this.startMgTimer(this.mg.pat.length*3+4,()=>{if(this.mg&&!this.mg.done){this.mg.done=true;this.lose('시간 초과!');}});
+    nextBeat();
+  },
+
+  drumTap(){
+    if(!this.mg||this.mg.phase!=='tap'||this.mg.done)return;
+    const beats=document.getElementById('br')?.querySelectorAll('.beat');
+    const idx=this.mg.idx-1;
+    if(this.mg.beatActive){
+      this.mg.correct++;
+      if(beats&&beats[idx])beats[idx].classList.add('hit');
+      document.getElementById('r-cor').textContent=this.mg.correct;
+    }else{
+      this.mg.wrong++;
+      if(beats&&beats[idx])beats[idx].classList.add('miss');
+      this.shake();
+      document.getElementById('r-err').textContent=this.mg.wrong;
+      if(this.mg.wrong>=this.mg.maxWrong){this.mg.done=true;this.stopMgTimer();this.lose('잘못된 박자에 탭했다!');}
+    }
+    this.mg.beatActive=false;
+  },
+
+  // ── 9. HIDDEN ──
+  mgHidden(n){
+    const sz=36,target='🗝️',need=n<=9?3:5;
+    const decoys=['👻','💀','🕯️','🩸','🔮','😈','🕷️','👁️','🌑','💫','⛧','🌀'];
+    const tPos=new Set();
+    while(tPos.size<need)tPos.add(Math.floor(Math.random()*sz));
+    let found=0,done=false;
+    const body=document.getElementById('mg-body');
+    body.innerHTML=`
+      <div class="mg-score">🗝️ 찾기: <span id="hf">0</span> / ${need}</div>
+      <div class="hid-grid" id="hg"></div>
+      <div class="tap-hint">그리드에서 🗝️를 모두 탭하세요!</div>`;
+    const g=document.getElementById('hg');
+    for(let i=0;i<sz;i++){
+      const c=document.createElement('div');c.className='h-cell';
+      const isTgt=tPos.has(i);
+      c.textContent=isTgt?target:decoys[Math.floor(Math.random()*decoys.length)];
+      c.dataset.t=isTgt?'1':'0';
+      c.ontouchstart=c.onclick=()=>{
+        if(c.classList.contains('found')||done)return;
+        if(c.dataset.t==='1'){
+          c.classList.add('found');found++;
+          document.getElementById('hf').textContent=found;
+          if(found>=need&&!done){done=true;this.stopMgTimer();this.win();}
+        }else{
+          c.classList.add('err');this.shake();
+          setTimeout(()=>c.classList.remove('err'),320);
+        }
+      };
+      g.appendChild(c);
+    }
+    this.startMgTimer(28,()=>{if(!done)this.lose('시간 초과! 🗝️를 다 찾지 못했다.');});
+  },
+
+  // ── 10. DICE ──
+  mgDice(n){
+    this.mg={pWin:0,dWin:0,need:3,bet:null,rolling:false,done:false};
+    const body=document.getElementById('mg-body');
+    body.innerHTML=`
+      <div style="font-size:12px;color:#555;text-align:center;margin-bottom:4px">
+        먼저 ${this.mg.need}번 이기면 승리! 베팅으로 보너스 가능.
+      </div>
+      <div class="dice-zone">
+        <div class="dice-col">
+          <div class="dice-face" id="d-p">⚀</div>
+          <div class="dice-lbl" style="color:#4488cc">나</div>
+        </div>
+        <div class="dice-vs">VS</div>
+        <div class="dice-col">
+          <div class="dice-face" id="d-d">⚀</div>
+          <div class="dice-lbl" style="color:#cc4444">악마</div>
+        </div>
+      </div>
+      <div class="score-row">나: <span id="pw">0</span>승 | 악마: <span id="dw">0</span>승</div>
+      <div style="font-size:12px;color:#666;text-align:center;margin-bottom:4px">베팅 선택 (선택사항):</div>
+      <div class="bet-row">
+        <button class="bet-btn" id="b-hi" ontouchstart="G.diceBet('hi')" onclick="G.diceBet('hi')">높게 ↑</button>
+        <button class="bet-btn" id="b-lo" ontouchstart="G.diceBet('lo')" onclick="G.diceBet('lo')">낮게 ↓</button>
+        <button class="bet-btn" id="b-eq" ontouchstart="G.diceBet('eq')" onclick="G.diceBet('eq')">동점 =</button>
+      </div>
+      <button class="roll-btn" id="roll" ontouchstart="G.diceRoll()" onclick="G.diceRoll()">🎲 주사위 굴리기</button>
+      <div class="dice-msg" id="dm"></div>`;
+    document.getElementById('mg-cd').textContent='∞';
+    document.getElementById('mg-bar').style.width='100%';
+  },
+  diceBet(t){
+    if(!this.mg||this.mg.rolling)return;
+    this.mg.bet=this.mg.bet===t?null:t;
+    ['hi','lo','eq'].forEach(k=>{
+      const b=document.getElementById('b-'+k);
+      if(b)b.classList.toggle('sel',this.mg.bet===k);
+    });
+  },
+  diceRoll(){
+    if(!this.mg||this.mg.rolling||this.mg.done)return;
+    this.mg.rolling=true;
+    const rollBtn=document.getElementById('roll');
+    if(rollBtn)rollBtn.disabled=true;
+    let rc=0;
+    const anim=setInterval(()=>{
+      const pd=document.getElementById('d-p'),dd=document.getElementById('d-d');
+      if(pd)pd.textContent=DICE_F[Math.floor(Math.random()*6)];
+      if(dd)dd.textContent=DICE_F[Math.floor(Math.random()*6)];
+      if(++rc>=10){
+        clearInterval(anim);
+        const pv=Math.floor(Math.random()*6)+1;
+        const dv=Math.floor(Math.random()*6)+1;
+        const pd2=document.getElementById('d-p'),dd2=document.getElementById('d-d');
+        if(pd2)pd2.textContent=DICE_F[pv-1];
+        if(dd2)dd2.textContent=DICE_F[dv-1];
+
+        let msg='',pGot=false;
+        if(pv>dv){this.mg.pWin++;msg=`내가 이겼다! (${pv} vs ${dv})`;pGot=true;}
+        else if(dv>pv){this.mg.dWin++;msg=`악마가 이겼다... (${pv} vs ${dv})`;this.shake();}
+        else{msg=`무승부! (${pv} vs ${dv})`;}
+
+        // Bet bonus
+        if(this.mg.bet){
+          const bc=(this.mg.bet==='hi'&&pv>dv)||(this.mg.bet==='lo'&&pv<dv)||(this.mg.bet==='eq'&&pv===dv);
+          if(bc){msg+=' 🎯 베팅 적중!';if(!pGot)this.mg.pWin++;}
+        }
+
+        const pwEl=document.getElementById('pw'),dwEl=document.getElementById('dw');
+        if(pwEl)pwEl.textContent=this.mg.pWin;
+        if(dwEl)dwEl.textContent=this.mg.dWin;
+        const dm=document.getElementById('dm');if(dm)dm.textContent=msg;
+
+        this.mg.bet=null;
+        ['hi','lo','eq'].forEach(k=>{const b=document.getElementById('b-'+k);if(b)b.classList.remove('sel');});
+        this.mg.rolling=false;
+        if(rollBtn)rollBtn.disabled=false;
+
+        if(this.mg.pWin>=this.mg.need){this.mg.done=true;setTimeout(()=>this.win(),800);}
+        else if(this.mg.dWin>=this.mg.need){this.mg.done=true;setTimeout(()=>this.lose('악마에게 주사위 대결에서 졌다!'),800);}
+      }
+    },100);
+  },
+};
+
+G.init();
+</script>
+</body>
+</html>
